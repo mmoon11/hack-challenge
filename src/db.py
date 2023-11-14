@@ -9,6 +9,7 @@ class Category(db.Model):
     __tablename__ = "category"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String, nullable=False)
+    applications = db.relationship("Application")
 
     def __init__(self, **kwargs):
         """
