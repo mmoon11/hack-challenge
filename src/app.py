@@ -1,5 +1,9 @@
 from db import db
 from flask import Flask
+from db import Category
+from db import Application
+from flash import request
+import json
 
 app = Flask(__name__)
 db_filename = "cms.db"
@@ -12,6 +16,11 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+def success_response(data, code=200):
+    return json.dumps(data), code
+
+def failure_response(message, code=404):
+    return json.dumps({"error": message}), code
 
 # FOR HOME PAGE:
 # @app.route("/api/applications/")
