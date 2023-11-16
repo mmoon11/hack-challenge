@@ -4,6 +4,7 @@ from db import Category
 from db import Application
 from flash import request
 import json
+from sqlalchemy import asc
 
 app = Flask(__name__)
 db_filename = "cms.db"
@@ -34,9 +35,34 @@ def failure_response(message, code=404):
         # so wondering if we should also have a GET for getting category name -> category id?
         # or replace category_id by a category string (so that the front end can access it that way)
 
+# Unfinished but a way I found to return applications in order
+@app.route("/api/applications/<int:category_id>/")
+def get_apps_by_category(category_id):
+    category = Category.query.filter_by(id=category_id).first()
+    if category is None:
+        return failure_response("Category not found")
+    applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.month), asc(Application.day), asc(Application.year))
+    return success_response([t.serialize() for t in applications])
+
 # ADD APPLICATION:
 # @app.route("/api/applications/", methods=["POST"])
 # POST an application
+
+# Also unfinished (and we might want input for category to be a String instead of category_id) 
+@app.route("/api/applications/", methods=["POST"])
+def create_application():
+    body = json.loads(request.data)
+    category_id = body.get("category_id")
+    category = Category.query.filter_by(id=category_id).first()
+    if category is None:
+        return failure_response("Category not found")
+    new_application = Application(title=body.get("title"), club_name=body.get("club_name"), 
+                                  description=body.get("description"), app_link=body.get("app_link"), 
+                                  club_link=body.get("club_link"), month=body.get("month"), day=body.get("day"), 
+                                  year=body.get("year"), category_id=body.get("category_id"))
+    db.session.add(new_application)
+    db.session.commit()
+    return success_response(new_application.serialize(), 201)
 
 # DELETE APPLICATION (past due date):
 # @app.route("/api/applications/<int:application_id>/", methods=["DELETE"])
