@@ -23,10 +23,25 @@ def success_response(data, code=200):
 def failure_response(message, code=404):
     return json.dumps({"error": message}), code
 
-# FOR HOME PAGE:
-# @app.route("/api/applications/")
-# GET all applications
-    # in this one we look through each one and see if deadline passed to call DELETE
+# GET all categories
+@app.route("/api/categories/")
+def get_categories():
+    """
+    Endpoint for getting all categories
+    """
+    categories = [t.serialize() for t in Category.query.all()]
+    return success_response({"categories":categories})
+
+# GET all applications (not in order yet)
+@app.route("/api/applications/")
+def get_applications():
+    """
+    Endpoint for getting all applications 
+    """
+    applications = [t.serialize() for t in Application.query.all()]
+    return success_response({"applications":applications})
+
+
 
 # FOR FILTERING:
 # @app.route("/api/applications/<int:category_id>/")
@@ -64,9 +79,18 @@ def create_application():
     db.session.commit()
     return success_response(new_application.serialize(), 201)
 
-# DELETE APPLICATION (past due date):
-# @app.route("/api/applications/<int:application_id>/", methods=["DELETE"])
 # DELETE an application by id
+@app.route("/api/applications/<int:application_id>/", methods=["DELETE"])
+def delete_app_by_id(application_id):
+    """
+    Endpoint for deleting application by its id
+    """
+    application = Application.query.filter_by(id=application_id).first()
+    if application is None:
+        return failure_response("Application not found")
+    db.session.delete(application)
+    db.session.commit()
+    return success_response(application.serialize())
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
