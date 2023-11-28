@@ -75,6 +75,10 @@ def create_application():
 
     if category_id is None:
         return failure_response("Category not found")
+    if (body.get("title") is None) or (body.get("club_name") is None) or (body.get("description") is None) or 
+    (body.get("app_link") is None) or (body.get("club_link") is None) or (body.get("month") is None) or (body.get("day") is None) or 
+    (body.get("year") is None):
+        return failure_response("Missing argument",400)
     new_application = Application(title=body.get("title"), club_name=body.get("club_name"), 
                                   description=body.get("description"), app_link=body.get("app_link"), 
                                   club_link=body.get("club_link"), month=body.get("month"), day=body.get("day"), 
