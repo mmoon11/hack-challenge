@@ -36,7 +36,6 @@ def success_response(data, code=200):
 def failure_response(message, code=404):
     return json.dumps({"error": message}), code
 
-# GET all categories
 @app.route("/api/categories/")
 def get_categories():
     """
@@ -45,37 +44,31 @@ def get_categories():
     categories = [t.serialize() for t in Category.query.all()]
     return success_response({"categories":categories})
 
-# GET all applications (not in order yet)
 @app.route("/api/applications/")
 def get_applications():
     """
     Endpoint for getting all applications 
     """
-    applications = [t.serialize() for t in Application.query.all()]
+    applications = [t.serialize() for t in Application.query.order_by(asc(Application.year), asc(Application.month), asc(Application.day), )]
     return success_response({"applications":applications})
 
-# FOR FILTERING:
-# @app.route("/api/applications/<string:category>/")
-# def get_application_by_category(category):
-#     category_id = Category.query.filter_by(name=category).first().id
-#     if category_id is None:
-#         return failure_response("No category exists")
-#     applications = Application.query.filter_by(category_id)
-#     return success_response(category_id)
-
-# Unfinished but a way I found to return applications in order
 @app.route("/api/applications/<string:category>/")
 def get_apps_by_category(category):
+    """
+    Endpoint for getting applications by category
+    """
     category_id = Category.query.filter_by(name=category).first().id
     category = Category.query.filter_by(id=category_id).first()
     if category is None:
         return failure_response("Category not found")
-    applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.month), asc(Application.day), asc(Application.year))
+    applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.year), asc(Application.month), asc(Application.day))
     return success_response([t.serialize() for t in applications])
 
-# Also unfinished (and we might want input for category to be a String instead of category_id) 
 @app.route("/api/applications/", methods=["POST"])
 def create_application():
+    """
+    Endpoint for creating an application
+    """
     body = json.loads(request.data)
     category = body.get("category")
     category_id = Category.query.filter_by(name=category).first().id
@@ -90,7 +83,6 @@ def create_application():
     db.session.commit()
     return success_response(new_application.serialize(), 201)
 
-# DELETE an application by id
 @app.route("/api/applications/<int:application_id>/", methods=["DELETE"])
 def delete_app_by_id(application_id):
     """
