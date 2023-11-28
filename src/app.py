@@ -16,6 +16,18 @@ app.config["SQLALCHEMY_ECHO"] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
+    categories = []
+    categories.append(Category(name="Project Team"))
+    categories.append(Category(name="STEM"))
+    categories.append(Category(name="Business"))
+    categories.append(Category(name="GreekLife"))
+    categories.append(Category(name="Arts"))
+    categories.append(Category(name="Social"))
+    categories.append(Category(name="Cultural"))
+    categories.append(Category(name="Environmental"))
+    for category in categories:  
+        db.session.add(category)
+        db.session.commit()
 
 def success_response(data, code=200):
     return json.dumps(data), code
