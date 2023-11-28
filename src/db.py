@@ -15,7 +15,7 @@ class Category(db.Model):
         """
         Initialize a Category object
         """
-        self.name = kwargs.get("category", "")
+        self.name = kwargs.get("name", "")
 
     def serialize(self):
         """

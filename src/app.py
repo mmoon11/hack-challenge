@@ -2,7 +2,7 @@ from db import db
 from flask import Flask
 from db import Category
 from db import Application
-from flash import request
+from flask import request
 import json
 from sqlalchemy import asc
 
@@ -16,17 +16,18 @@ app.config["SQLALCHEMY_ECHO"] = True
 db.init_app(app)
 with app.app_context():
     db.create_all()
-    categories = []
-    categories.append(Category(name="Project Team"))
-    categories.append(Category(name="STEM"))
-    categories.append(Category(name="Business"))
-    categories.append(Category(name="GreekLife"))
-    categories.append(Category(name="Arts"))
-    categories.append(Category(name="Social"))
-    categories.append(Category(name="Cultural"))
-    categories.append(Category(name="Environmental"))
-    for category in categories:  
-        db.session.add(category)
+    if not Category.query.first():
+        categories = []
+        categories.append(Category(name="project-team"))
+        categories.append(Category(name="stem"))
+        categories.append(Category(name="business"))
+        categories.append(Category(name="greek-life"))
+        categories.append(Category(name="arts"))
+        categories.append(Category(name="social"))
+        categories.append(Category(name="cultural"))
+        categories.append(Category(name="environmental"))
+        for category in categories:  
+            db.session.add(category)
         db.session.commit()
 
 def success_response(data, code=200):
@@ -53,40 +54,38 @@ def get_applications():
     applications = [t.serialize() for t in Application.query.all()]
     return success_response({"applications":applications})
 
-
-
 # FOR FILTERING:
-# @app.route("/api/applications/<int:category_id>/")
-# GET all applications by category id
-    # I have a feeling the iOS people would input the category string (not category_id)
-        # so wondering if we should also have a GET for getting category name -> category id?
-        # or replace category_id by a category string (so that the front end can access it that way)
+# @app.route("/api/applications/<string:category>/")
+# def get_application_by_category(category):
+#     category_id = Category.query.filter_by(name=category).first().id
+#     if category_id is None:
+#         return failure_response("No category exists")
+#     applications = Application.query.filter_by(category_id)
+#     return success_response(category_id)
 
 # Unfinished but a way I found to return applications in order
-@app.route("/api/applications/<int:category_id>/")
-def get_apps_by_category(category_id):
+@app.route("/api/applications/<string:category>/")
+def get_apps_by_category(category):
+    category_id = Category.query.filter_by(name=category).first().id
     category = Category.query.filter_by(id=category_id).first()
     if category is None:
         return failure_response("Category not found")
     applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.month), asc(Application.day), asc(Application.year))
     return success_response([t.serialize() for t in applications])
 
-# ADD APPLICATION:
-# @app.route("/api/applications/", methods=["POST"])
-# POST an application
-
 # Also unfinished (and we might want input for category to be a String instead of category_id) 
 @app.route("/api/applications/", methods=["POST"])
 def create_application():
     body = json.loads(request.data)
-    category_id = body.get("category_id")
-    category = Category.query.filter_by(id=category_id).first()
-    if category is None:
+    category = body.get("category")
+    category_id = Category.query.filter_by(name=category).first().id
+
+    if category_id is None:
         return failure_response("Category not found")
     new_application = Application(title=body.get("title"), club_name=body.get("club_name"), 
                                   description=body.get("description"), app_link=body.get("app_link"), 
                                   club_link=body.get("club_link"), month=body.get("month"), day=body.get("day"), 
-                                  year=body.get("year"), category_id=body.get("category_id"))
+                                  year=body.get("year"), category_id=category_id)
     db.session.add(new_application)
     db.session.commit()
     return success_response(new_application.serialize(), 201)
