@@ -49,7 +49,7 @@ def get_applications():
     """
     Endpoint for getting all applications 
     """
-    applications = [t.serialize() for t in Application.query.order_by(asc(Application.year), asc(Application.month), asc(Application.day), )]
+    applications = [t.serialize() for t in Application.query.order_by(asc(Application.year), asc(Application.month), asc(Application.day), asc(Application.hour),asc(Application.minute))]
     return success_response({"applications":applications})
 
 @app.route("/api/applications/<string:category>/")
@@ -61,7 +61,7 @@ def get_apps_by_category(category):
     category = Category.query.filter_by(id=category_id).first()
     if category is None:
         return failure_response("Category not found")
-    applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.year), asc(Application.month), asc(Application.day))
+    applications = Application.query.filter_by(category_id=category.id).order_by(asc(Application.year), asc(Application.month), asc(Application.day),asc(Application.hour),asc(Application.minute))
     return success_response([t.serialize() for t in applications])
 
 @app.route("/api/applications/", methods=["POST"])
@@ -76,13 +76,13 @@ def create_application():
     if category_id is None:
         return failure_response("Category not found")
     if (body.get("title") is None) or (body.get("club_name") is None) or (body.get("description") is None) or 
-    (body.get("app_link") is None) or (body.get("club_link") is None) or (body.get("month") is None) or (body.get("day") is None) or 
-    (body.get("year") is None):
+    (body.get("app_link") is None) or (body.get("club_link") is None) or (body.get("image_link") is None) or (body.get("month") is None) or (body.get("day") is None) or 
+    (body.get("year") is None) or (body.get("hour") is None) or (body.get("minute") is None):
         return failure_response("Missing argument",400)
     new_application = Application(title=body.get("title"), club_name=body.get("club_name"), 
                                   description=body.get("description"), app_link=body.get("app_link"), 
-                                  club_link=body.get("club_link"), month=body.get("month"), day=body.get("day"), 
-                                  year=body.get("year"), category_id=category_id)
+                                  club_link=body.get("club_link"), image_link=body.get("image_link"), month=body.get("month"), day=body.get("day"), 
+                                  year=body.get("year"), hour=body.get("hour"), minute=body.get("minute"), category_id=category_id)
     db.session.add(new_application)
     db.session.commit()
     return success_response(new_application.serialize(), 201)
