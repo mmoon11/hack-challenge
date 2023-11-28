@@ -40,6 +40,8 @@ class Application(db.Model):
     month = db.Column(db.Integer, nullable=False)
     day = db.Column(db.Integer, nullable=False)
     year = db.Column(db.Integer, nullable=False)
+    hour = db.Column(db.Integer, nullable=False)
+    minute = db.Column(db.Integer, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
 
     def __init__(self, **kwargs):
@@ -54,6 +56,8 @@ class Application(db.Model):
         self.month = kwargs.get("month", 0)
         self.day = kwargs.get("day", 0)
         self.year = kwargs.get("year", 0)
+        self.hour = kwargs.get("hour", 0)
+        self.minute = kwargs.get("minute", 0)
         self.category_id = kwargs.get("category_id", 0)
     
     def serialize(self):
@@ -71,5 +75,7 @@ class Application(db.Model):
             "month": self.month,
             "day": self.day,
             "year": self.year,
+            "hour": self.hour,
+            "minute": self.minute,
             "category": category.serialize()
         }
