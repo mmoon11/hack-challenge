@@ -38,6 +38,7 @@ class Application(db.Model):
     app_link = db.Column(db.String, nullable=False)
     club_link = db.Column(db.String)
     image_link = db.Column(db.String)
+    chat_link = db.Column(db.String)
     month = db.Column(db.Integer, nullable=False)
     day = db.Column(db.Integer, nullable=False)
     year = db.Column(db.Integer, nullable=False)
@@ -55,6 +56,7 @@ class Application(db.Model):
         self.app_link = kwargs.get("app_link", "")
         self.club_link = kwargs.get("club_link", "")
         self.image_link = kwargs.get("image_link", "")
+        self.chat_link = kwargs.get("image_link", "")
         self.month = kwargs.get("month", 0)
         self.day = kwargs.get("day", 0)
         self.year = kwargs.get("year", 0)
@@ -75,6 +77,7 @@ class Application(db.Model):
             "app_link": self.app_link,
             "club_link": self.club_link,
             "image_link": self.image_link,
+            "chat_link": self.chat_link,
             "month": self.month,
             "day": self.day,
             "year": self.year,
